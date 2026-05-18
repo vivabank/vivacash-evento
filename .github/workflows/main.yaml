@@ -75,7 +75,7 @@ jobs:
 
           # Substituir domínios
           sed -i "s|/\*{{DEVELOP_DOMAINS}}\*/|'dev.meuvivacash.com'|g" current_code.js
-          sed -i "s|/\*{{MAIN_DOMAINS}}\*/|'www.meuvivacash.com', 'meuvivacash.com'|g" current_code.js
+          sed -i "s|/\*{{MAIN_DOMAINS}}\*/|'www.meuvivacash.com', 'meuvivacash.com', 'evento.meuvivacash.com'|g" current_code.js
 
           # Substituir prefixos de versão (incluindo subdiretórios S3)
           sed -i "s|DEFAULT_PLACEHOLDER|/evento/main/main-latest|g" current_code.js
