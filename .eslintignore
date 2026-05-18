@@ -1,0 +1,14 @@
+# Infraestrutura (CloudFront Functions não são parte da aplicação)
+infra/
+
+# Build outputs
+dist/
+dist-ssr/
+
+# Dependencies
+node_modules/
+
+# Lock files
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
