@@ -57,7 +57,7 @@ jobs:
           cp infra/cloudfront-router.js current_code.js
 
           # Substituir domínios
-          sed -i "s|/\*{{DEVELOP_DOMAINS}}\*/|'dev.meuvivacash.com'|g" current_code.js
+          sed -i "s|/\*{{DEVELOP_DOMAINS}}\*/|'dev.meuvivacash.com', 'dev-evento.meuvivacash.com'|g" current_code.js
           sed -i "s|/\*{{MAIN_DOMAINS}}\*/|'www.meuvivacash.com', 'meuvivacash.com', 'evento.meuvivacash.com'|g" current_code.js
 
           # Substituir prefixos de versão (incluindo subdiretórios S3)
