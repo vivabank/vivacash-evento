@@ -186,6 +186,35 @@ input {
   box-shadow: 0 1px 0 rgba(16, 34, 58, 0.03);
 }
 
+select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 49px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface-strong) url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24'%3E%3Cpath fill='%2394a3b8' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E") no-repeat right 14px center;
+  padding: 0.95rem 2.5rem 0.95rem 1rem;
+  color: var(--text);
+  outline: none;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+  box-shadow: 0 1px 0 rgba(16, 34, 58, 0.03);
+}
+
+select:focus {
+  border-color: rgba(27, 92, 255, 0.45);
+  box-shadow: 0 0 0 4px rgba(27, 92, 255, 0.12);
+}
+
+/* Remove default IE/Edge dropdown arrow */
+select::-ms-expand {
+  display: none;
+}
+
 input::placeholder {
   color: #94a3b8;
 }

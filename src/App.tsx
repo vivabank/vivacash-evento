@@ -47,6 +47,7 @@ export function App() {
         fullName: '',
         document: '',
         company: '',
+        role: '',
     });
     const [savedFormData, setSavedFormData] = useState<FormData | null>(null);
     const [qrData, setQrData] = useState('');
@@ -151,7 +152,7 @@ export function App() {
         if (!registrationData) return;
         console.log('Registro completo:', registrationData);
         alert(formatRegistrationData(registrationData));
-        setFormData({ fullName: '', document: '', company: '' });
+        setFormData({ fullName: '', document: '', company: '', role: '' });
         setSavedFormData(null);
         setQrData('');
         setStage('form');
@@ -303,12 +304,12 @@ export function App() {
                                 />
                             </div>
                             <div className="form-group">
-                                <label htmlFor="company">Cargo</label>
+                                <label htmlFor="role">Cargo</label>
                                 <select
-                                    id="company"
-                                    name="company"
-                                    value={formData.company}
-                                    onChange={(e) => setFormData((prev) => ({ ...prev, company: e.target.value }))}
+                                    id="role"
+                                    name="role"
+                                    value={formData.role || ''}
+                                    onChange={(e) => setFormData((prev) => ({ ...prev, role: e.target.value }))}
                                     required
                                 >
                                     <option value="">Selecione um cargo</option>
@@ -328,7 +329,7 @@ export function App() {
                                 </select>
                             </div>
                             <button type="submit" className="btn-submit">
-                                Continuar com QR Code
+                                Continuar cadastro
                             </button>
                         </form>
                     </div>

@@ -6,6 +6,7 @@ export interface FormData {
   fullName: string;
   document: string;
   company: string;
+  role: string;
 }
 
 export interface RegistrationData extends FormData {
