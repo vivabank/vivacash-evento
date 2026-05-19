@@ -133,6 +133,20 @@ export function App() {
         setQrData('');
     };
 
+    function isValidCPF(cpf: string): boolean {
+        if (/^(\d)\1{10}$/.test(cpf)) return false; // ex: 111.111.111-11
+
+        const calc = (mod: number) => {
+            const sum = cpf
+                .slice(0, mod - 1)
+                .split('')
+                .reduce((acc, digit, i) => acc + Number(digit) * (mod - i), 0);
+            const rest = (sum * 10) % 11;
+            return rest === 10 || rest === 11 ? 0 : rest;
+        };
+
+        return calc(10) === Number(cpf[9]) && calc(11) === Number(cpf[10]);
+    }
     const onFinish = () => {
         if (!registrationData) return;
         console.log('Registro completo:', registrationData);
@@ -251,14 +265,28 @@ export function App() {
                                 />
                             </div>
                             <div className="form-group">
-                                <label htmlFor="document">Documento (CPF/CNPJ)</label>
+                                <label htmlFor="document">Documento (CPF)</label>
                                 <input
                                     id="document"
                                     name="document"
                                     type="text"
-                                    placeholder="Digite seu CPF ou CNPJ"
+                                    placeholder="000.000.000-00"
+                                    maxLength={14}
                                     value={formData.document}
-                                    onChange={(e) => setFormData((prev) => ({ ...prev, document: e.target.value }))}
+                                    onChange={(e) => {
+                                        const masked = e.target.value
+                                            .replace(/\D/g, '')
+                                            .replace(/(\d{3})(\d)/, '$1.$2')
+                                            .replace(/(\d{3})(\d)/, '$1.$2')
+                                            .replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+                                        setFormData((prev) => ({ ...prev, document: masked }));
+                                    }}
+                                    onBlur={() => {
+                                        const digits = formData.document.replace(/\D/g, '');
+                                        if (digits.length === 11 && !isValidCPF(digits)) {
+                                            alert('CPF inválido!'); // troque pelo seu método de erro (toast, estado, etc)
+                                        }
+                                    }}
                                     required
                                 />
                             </div>
@@ -336,10 +364,6 @@ export function App() {
                 <section className="camera-section">
                     <div className="section-header">
                         <img src={logoUrl} alt="OK" className="section-badge success" />
-                        <div>
-                            <h1>QR Code lido</h1>
-                            <p>Confira o código capturado e continue</p>
-                        </div>
                     </div>
                     <div className="qr-result">
                         <h3>QR Code Lido!</h3>
