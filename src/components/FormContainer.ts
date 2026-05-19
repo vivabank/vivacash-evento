@@ -11,7 +11,7 @@ export interface FormContainerCallbacks {
 export function createFormContainer(callbacks: FormContainerCallbacks): HTMLDivElement {
   const container = document.createElement('div');
   container.className = 'form-section';
-  
+
   container.innerHTML = `
     <h1>VIVA.cash</h1>
     <h2>Registro do Evento</h2>
@@ -44,7 +44,7 @@ export function createFormContainer(callbacks: FormContainerCallbacks): HTMLDivE
           type="text" 
           id="company" 
           name="company" 
-          placeholder="Digite o nome da empresa"
+          placeholder="Digite o nome da Empresa"
           required
         />
       </div>
@@ -61,9 +61,9 @@ export function createFormContainer(callbacks: FormContainerCallbacks): HTMLDivE
       e.preventDefault();
 
       const formData: FormData = {
-        fullName: (container.querySelector<HTMLInputElement>('#fullName')?.value || ''),
-        document: (container.querySelector<HTMLInputElement>('#document')?.value || ''),
-        company: (container.querySelector<HTMLInputElement>('#company')?.value || ''),
+        fullName: container.querySelector<HTMLInputElement>('#fullName')?.value || '',
+        document: container.querySelector<HTMLInputElement>('#document')?.value || '',
+        company: container.querySelector<HTMLInputElement>('#company')?.value || '',
       };
 
       callbacks.onSubmit(formData);
