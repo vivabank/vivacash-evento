@@ -16,15 +16,15 @@ export class DeviceService {
    */
   static getDeviceType(): 'mobile' | 'tablet' | 'desktop' {
     const userAgent = navigator.userAgent.toLowerCase();
-    
+
     if (/mobile|android|iphone|ipod/.test(userAgent)) {
       return 'mobile';
     }
-    
+
     if (/ipad|android(?!.*mobile)/.test(userAgent)) {
       return 'tablet';
     }
-    
+
     return 'desktop';
   }
 
@@ -41,11 +41,11 @@ export class DeviceService {
   /**
    * Obtém permissão de câmera
    */
-  static async requestCameraPermission(facingMode: 'user' | 'environment' = 'user'): Promise<MediaStream> {
+  static async requestCameraPermission(): Promise<MediaStream> {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
-          facingMode,
+          facingMode: { exact: 'environment' }, // só câmera traseira
           width: { ideal: 1280 },
           height: { ideal: 720 },
         },
@@ -53,7 +53,9 @@ export class DeviceService {
       });
       return stream;
     } catch (error) {
-      throw new Error(`Erro ao acessar câmera: ${error instanceof Error ? error.message : 'Desconhecido'}`);
+      throw new Error(
+        `Erro ao acessar câmera traseira: ${error instanceof Error ? error.message : 'Desconhecido'}`
+      );
     }
   }
 }

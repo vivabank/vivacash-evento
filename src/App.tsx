@@ -81,7 +81,7 @@ export function App() {
                 setStage('form');
                 return;
             }
-            const stream = await DeviceService.requestCameraPermission('user');
+            const stream = await DeviceService.requestCameraPermission();
             mediaStreamRef.current = stream;
             const video = videoRef.current;
             const canvas = canvasRef.current;
@@ -152,7 +152,7 @@ export function App() {
     //     );
     //   }
 
-    const isLastSlide = onboardingSlide === ONBOARDING_SLIDES.length - 0;
+    const isLastSlide = onboardingSlide === ONBOARDING_SLIDES.length - 1;
     const currentSlide = ONBOARDING_SLIDES[onboardingSlide];
 
     if (!isMobile) {
