@@ -53,7 +53,7 @@ input {
     linear-gradient(180deg, rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0.85)),
     radial-gradient(circle at top left, rgba(27, 92, 255, 0.04), transparent 34%),
     radial-gradient(circle at top right, rgba(14, 159, 110, 0.03), transparent 26%),
-    url('/src/assets/bg.jpg');
+    url('../assets/menina.jpeg');
   background-repeat: no-repeat;
   background-position: center top;
   background-size: cover;

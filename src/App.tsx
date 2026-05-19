@@ -3,6 +3,7 @@ import { DeviceService } from '@services/DeviceService';
 import { QRCodeService } from '@services/QRCodeService';
 import { createRegistrationData, formatRegistrationData } from '@utils/index';
 import type { FormData, RegistrationData } from '@app-types/index';
+import logoUrl from './assets/logo.svg';
 
 type Stage = 'onboarding' | 'form' | 'camera' | 'result';
 
@@ -178,7 +179,7 @@ export function App() {
             {stage === 'onboarding' && (
                 <section className="onboarding-section">
                     <div className="onboarding-header">
-                        <img src="/src/assets/logo.svg" alt="VIVA.cash" className="onboarding-logo-mark" />
+                        <img src={logoUrl} alt="VIVA.cash" className="onboarding-logo-mark" />
                     </div>
                     <div>
                         <div className="onboarding-illustration">
@@ -233,7 +234,7 @@ export function App() {
             {stage === 'form' && (
                 <section className="form-section">
                     <div className="section-header">
-                        <img src="/src/assets/logo.svg" alt="VIVA.cash" className="section-badge" />
+                        <img src={logoUrl} alt="VIVA.cash" className="section-badge" />
                     </div>
                     <div className="form-container">
                         <form onSubmit={onSubmitForm}>
@@ -273,17 +274,30 @@ export function App() {
                                     required
                                 />
                             </div>
-                              <div className="form-group">
+                            <div className="form-group">
                                 <label htmlFor="company">Cargo</label>
-                                <input
+                                <select
                                     id="company"
                                     name="company"
-                                    type="text"
-                                    placeholder="Digite o nome da empresa"
                                     value={formData.company}
                                     onChange={(e) => setFormData((prev) => ({ ...prev, company: e.target.value }))}
                                     required
-                                />
+                                >
+                                    <option value="">Selecione um cargo</option>
+                                    <option value="estagiario">Estagiário</option>
+                                    <option value="auxiliar">Auxiliar</option>
+                                    <option value="assistente">Assistente</option>
+                                    <option value="analista_junior">Analista Júnior</option>
+                                    <option value="analista_pleno">Analista Pleno</option>
+                                    <option value="analista_senior">Analista Sênior</option>
+                                    <option value="especialista">Especialista</option>
+                                    <option value="coordenador">Coordenador</option>
+                                    <option value="supervisor">Supervisor</option>
+                                    <option value="gerente">Gerente</option>
+                                    <option value="diretor">Diretor</option>
+                                    <option value="ceo">CEO</option>
+                                    <option value="outro">Outro</option>
+                                </select>
                             </div>
                             <button type="submit" className="btn-submit">
                                 Continuar com QR Code
@@ -297,7 +311,7 @@ export function App() {
             {stage === 'camera' && (
                 <section className="camera-section">
                     <div className="section-header">
-                        <img src="/src/assets/logo.svg" alt="QR" className="section-badge" />
+                        <img src={logoUrl} alt="QR" className="section-badge" />
                     </div>
                     <div className='camera-section-container'>
                         <div className="camera-instructions">
@@ -321,7 +335,7 @@ export function App() {
             {stage === 'result' && (
                 <section className="camera-section">
                     <div className="section-header">
-                        <img src="/src/assets/logo.svg" alt="OK" className="section-badge success" />
+                        <img src={logoUrl} alt="OK" className="section-badge success" />
                         <div>
                             <h1>QR Code lido</h1>
                             <p>Confira o código capturado e continue</p>
