@@ -13,7 +13,7 @@ jobs:
     env:
       AWS_S3_BUCKET: vivacash-frontend
       VERSION_PATH: main-v${{ github.run_number }}
-      FUNCTION_NAME: VivaCashRouter
+      FUNCTION_NAME: VivaCashEventoRouter
       DIST_ID: E1PQ2RJZYTOCQ9
     environment:
       name: production
