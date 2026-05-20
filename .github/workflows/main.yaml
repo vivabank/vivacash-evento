@@ -1,4 +1,4 @@
-name: Deploy VivaCash Frontend - Main
+name: Deploy VivaCash Evento - Main
 
 on:
   push:
@@ -13,7 +13,7 @@ jobs:
     env:
       AWS_S3_BUCKET: vivacash-frontend
       VERSION_PATH: main-v${{ github.run_number }}
-      FUNCTION_NAME: VivaCashEventoRouter
+      FUNCTION_NAME: VivaCashUnifiedRouter
       DIST_ID: E1PQ2RJZYTOCQ9
     environment:
       name: production
@@ -69,80 +69,27 @@ jobs:
           aws s3 sync dist/ s3://${{ env.AWS_S3_BUCKET }}/evento/main/${{ env.VERSION_PATH }}/ --delete
           aws s3 sync dist/ s3://${{ env.AWS_S3_BUCKET }}/evento/main/main-latest/ --delete
 
-      - name: Update CloudFront Function
+      - name: Update and Publish CloudFront Function
         run: |
-          cp infra/cloudfront-router.js current_code.js
-
-          # Substituir domínios
-          sed -i "s|/\*{{DEVELOP_DOMAINS}}\*/|'dev-evento.meuvivacash.com'|g" current_code.js
-          sed -i "s|/\*{{MAIN_DOMAINS}}\*/|'evento.meuvivacash.com'|g" current_code.js
-
-          # Substituir prefixos de versão (incluindo subdiretórios S3)
-          sed -i "s|DEFAULT_PLACEHOLDER|/evento/main/main-latest|g" current_code.js
-          sed -i "s|DEVELOP_PLACEHOLDER|/evento/develop/develop-latest|g" current_code.js
-          sed -i "s|MAIN_PLACEHOLDER|/evento/main/main-latest|g" current_code.js
-
           # Criar função se não existir
           if ! aws cloudfront describe-function --name ${{ env.FUNCTION_NAME }} --stage DEVELOPMENT &>/dev/null; then
             echo "⚠️ Função não existe, criando..."
             aws cloudfront create-function \
               --name ${{ env.FUNCTION_NAME }} \
-              --function-config '{"Comment":"VivaCash Main ${{ github.run_number }}","Runtime":"cloudfront-js-2.0"}' \
-              --function-code fileb://current_code.js
+              --function-config '{"Comment":"VivaCash Unified Router","Runtime":"cloudfront-js-2.0"}' \
+              --function-code fileb://infra/cloudfront-router.js
             echo "✅ Função criada com sucesso"
           fi
 
-          # Atualizar função
+          # Atualizar função com o código unificado do repositório
           ETAG=$(aws cloudfront describe-function --name ${{ env.FUNCTION_NAME }} --stage DEVELOPMENT --query 'ETag' --output text)
-          aws cloudfront update-function --name ${{ env.FUNCTION_NAME }} --function-config '{"Comment":"VivaCash Main ${{ github.run_number }}","Runtime":"cloudfront-js-2.0"}' --function-code fileb://current_code.js --if-match $ETAG
+          aws cloudfront update-function --name ${{ env.FUNCTION_NAME }} --function-config '{"Comment":"VivaCash Unified Router","Runtime":"cloudfront-js-2.0"}' --function-code fileb://infra/cloudfront-router.js --if-match $ETAG
 
-          # Publicar função
+          # Publicar função em produção (LIVE)
           NEW_ETAG=$(aws cloudfront describe-function --name ${{ env.FUNCTION_NAME }} --stage DEVELOPMENT --query 'ETag' --output text)
           aws cloudfront publish-function --name ${{ env.FUNCTION_NAME }} --if-match $NEW_ETAG
-          echo "✅ Função atualizada e publicada"
-
-      - name: Associate Function to CloudFront Distribution
-        run: |
-          # Obter ARN da função
-          FUNCTION_ARN=$(aws cloudfront describe-function --name ${{ env.FUNCTION_NAME }} --stage LIVE --query 'FunctionSummary.FunctionMetadata.FunctionARN' --output text)
-          echo "Function ARN: $FUNCTION_ARN"
-
-          # Verificar se já está associada
-          CURRENT_ASSOCIATION=$(aws cloudfront get-distribution-config --id ${{ env.DIST_ID }} --query 'DistributionConfig.DefaultCacheBehavior.FunctionAssociations.Items[?FunctionARN==`'"$FUNCTION_ARN"'`].FunctionARN' --output text)
-
-          if [ -z "$CURRENT_ASSOCIATION" ]; then
-            echo "⚠️ Função não está associada, associando..."
-            
-            # Obter configuração atual
-            aws cloudfront get-distribution-config --id ${{ env.DIST_ID }} > /tmp/cf-config.json
-            ETAG=$(jq -r '.ETag' /tmp/cf-config.json)
-            
-            # Atualizar associação
-            jq --arg arn "$FUNCTION_ARN" '.DistributionConfig.DefaultCacheBehavior.FunctionAssociations = {
-              "Quantity": 1,
-              "Items": [
-                {
-                  "FunctionARN": $arn,
-                  "EventType": "viewer-request"
-                }
-              ]
-            }' /tmp/cf-config.json | jq '.DistributionConfig' > /tmp/cf-config-updated.json
-            
-            # Atualizar distribuição
-            aws cloudfront update-distribution \
-              --id ${{ env.DIST_ID }} \
-              --distribution-config file:///tmp/cf-config-updated.json \
-              --if-match "$ETAG"
-            
-            echo "✅ Função associada à distribuição"
-          else
-            echo "✅ Função já está associada"
-          fi
+          echo "✅ Função atualizada e publicada em LIVE"
 
       - name: Invalidate CloudFront Cache
-        run: |
-          aws cloudfront create-invalidation --distribution-id ${{ env.DIST_ID }} --paths "/*"
-
-      - name: CloudFront Invalidation
         run: |
           aws cloudfront create-invalidation --distribution-id ${{ env.DIST_ID }} --paths "/*"
