@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { DeviceService } from '@services/DeviceService';
 import { QRCodeService } from '@services/QRCodeService';
+import { registerEvent } from '@services/ApiService';
 import { createRegistrationData, formatRegistrationData } from '@utils/index';
 import type { FormData, RegistrationData } from '@app-types/index';
 import logoUrl from './assets/logo.svg';
@@ -52,6 +53,7 @@ export function App() {
     const [savedFormData, setSavedFormData] = useState<FormData | null>(null);
     const [qrData, setQrData] = useState('');
     const [cameraError, setCameraError] = useState('');
+    const [isRegistering, setIsRegistering] = useState(false);
 
     const videoRef = useRef<HTMLVideoElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -89,9 +91,27 @@ export function App() {
             const canvas = canvasRef.current;
             if (!video || !canvas) throw new Error('Elementos de camera nao encontrados.');
             video.srcObject = stream;
-            QRCodeService.startScanning(video, canvas, (code) => {
+            QRCodeService.startScanning(video, canvas, async (code) => {
+                QRCodeService.stopScanning();
                 setQrData(code);
-                setStage('result');
+                setIsRegistering(true);
+                try {
+                    await registerEvent({
+                        documentNumber: savedFormData!.document.replace(/\D/g, ''),
+                        personName: savedFormData!.fullName,
+                        metadata: {
+                            companyName: savedFormData!.company,
+                            position: savedFormData!.role,
+                        },
+                    });
+                    setStage('result');
+                } catch (error) {
+                    const message = error instanceof Error ? error.message : 'Erro ao registrar';
+                    setCameraError(message);
+                    setStage('form');
+                } finally {
+                    setIsRegistering(false);
+                }
             });
         } catch (error) {
             const message = error instanceof Error ? error.message : 'Erro desconhecido';
@@ -149,9 +169,6 @@ export function App() {
         return calc(10) === Number(cpf[9]) && calc(11) === Number(cpf[10]);
     }
     const onFinish = () => {
-        if (!registrationData) return;
-        console.log('Registro completo:', registrationData);
-        alert(formatRegistrationData(registrationData));
         setFormData({ fullName: '', document: '', company: '', role: '' });
         setSavedFormData(null);
         setQrData('');
@@ -352,8 +369,13 @@ export function App() {
                             <canvas ref={canvasRef} hidden />
                             <div className="scan-frame" />
                         </div>
+                        {isRegistering && (
+                            <div className="camera-loading-overlay">
+                                <p>Registrando...</p>
+                            </div>
+                        )}
                         <div className="camera-buttons">
-                            <button type="button" className="btn-secondary" onClick={onCancelCamera}>
+                            <button type="button" className="btn-secondary" onClick={onCancelCamera} disabled={isRegistering}>
                                 Cancelar
                             </button>
                         </div>
