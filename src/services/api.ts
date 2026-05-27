@@ -27,7 +27,7 @@ export interface RegisterUserResponse {
 export async function validateToken(tokenHash: string): Promise<ValidateTokenResponse> {
   const res = await fetch(`${BASE_URL}/auth/token/validate`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', 'tenant-id': 'viva' },
     body: JSON.stringify({ tokenHash }),
   })
   if (!res.ok) throw new Error(`Erro ao validar token (${res.status})`)
@@ -42,7 +42,7 @@ export async function registerUser(params: {
 }): Promise<RegisterUserResponse> {
   const res = await fetch(`${BASE_URL}/auth/register/event`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', 'tenant-id': 'viva' },
     body: JSON.stringify({
       documentNumber: params.documentNumber,
       personName: params.personName,
