@@ -73,7 +73,7 @@ jobs:
         run: |
           # Criar função se não existir
           if ! aws cloudfront describe-function --name ${{ env.FUNCTION_NAME }} --stage DEVELOPMENT &>/dev/null; then
-            echo "⚠️ Função não existe, criando..."
+            echo "⚠️ Função não existe, criando...."
             aws cloudfront create-function \
               --name ${{ env.FUNCTION_NAME }} \
               --function-config '{"Comment":"VivaCash Unified Router","Runtime":"cloudfront-js-2.0"}' \
