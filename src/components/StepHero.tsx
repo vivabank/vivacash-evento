@@ -35,12 +35,12 @@ export default function StepHero({ onNext }: StepProps) {
         sx={{
           fontWeight: 700,
           lineHeight: 1.15,
-          fontSize: { xs: 20, sm: 38 },
+          fontSize: { xs: 16, sm: 38 },
           mb: 2.5,
         }}
       >
         <Box component="span" sx={{ color: '#FFFFFF' }}>
-          Sua equipe performa mais quando entende o que ganha
+         Sua equipe performa mais quando entende o que ganha
         </Box>
       </Typography>
 
@@ -58,13 +58,12 @@ export default function StepHero({ onNext }: StepProps) {
         sx={{
           color: 'rgba(255,255,255,0.88)',
           fontWeight: 300,
-          fontSize: { xs: 14.5, sm: 16 },
+          fontSize: { xs: 17, sm: 16 },
           lineHeight: 1.6,
           mb: 2.5,
         }}
       >
-        A <b>Viva Tech</b> é uma plataforma de gestão de remuneração variável que conecta desempenho, transparência e engajamento. Com ela, sua empresa configura regras, acompanha resultados e garante que cada colaborador entenda exatamente como sua remuneração é calculada, em tempo real.
-        O resultado é um time mais motivado, mais produtivo e um investimento em remuneração variável que finalmente trabalha a seu favor.
+        A <b>Viva Tech</b> é uma plataforma de gestão de remuneração variável que conecta desempenho, transparência e engajamento. Com ela, sua empresa configura regras, acompanha resultados e garante que cada colaborador entenda exatamente como sua remuneração é calculada, em tempo real. 
       </Typography>
 
       <Typography
@@ -72,7 +71,7 @@ export default function StepHero({ onNext }: StepProps) {
         sx={{
           fontWeight: 700,
           lineHeight: 1.15,
-          fontSize: { xs: 20, sm: 38 },
+          fontSize: { xs: 16, sm: 38 },
           mb: 2.5,
         }}
       >
@@ -92,13 +91,12 @@ export default function StepHero({ onNext }: StepProps) {
         sx={{
           color: 'rgba(255,255,255,0.88)',
           fontWeight: 300,
-          fontSize: { xs: 14.5, sm: 16 },
+          fontSize: { xs: 17, sm: 16 },
           lineHeight: 1.6,
           mb: 2.5,
         }}
       >
-        A <b>Viva Cash</b> é o braço financeiro da Viva Tech. Com ela, seus colaboradores podem antecipar a remuneração variável que já conquistaram, sem burocracia e sem custo para a empresa.
-        É um benefício real, disponível dentro da mesma plataforma que sua equipe já usa todos os dias.
+        A <b>Viva Cash</b> é o braço financeiro da Viva Tech. Com ela, seus colaboradores podem antecipar a remuneração variável que já conquistaram, sem burocracia e sem custo para a empresa. É um benefício real, disponível dentro da mesma plataforma que sua equipe já usa todos os dias.
       </Typography>
       <Button
         onClick={onNext}
