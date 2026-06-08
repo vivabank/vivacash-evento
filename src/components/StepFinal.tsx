@@ -96,7 +96,7 @@ export default function StepFinal({ formData, onBackToForm }: StepFinalProps) {
           textAlign: 'center',
         }}
       >
-          <Box
+        <Box
           component="img"
           src="/assets/logo-white-vivatech.png"
           alt="Viva Tech"
@@ -232,17 +232,9 @@ export default function StepFinal({ formData, onBackToForm }: StepFinalProps) {
                 color="primary"
                 size="large"
                 sx={{ py: 1.1, width: '100%', maxWidth: 280 }}
-                onClick={onBackToForm}
+                onClick={() => window.location.href = 'https://www.vivafintech.com.br/'}
               >
-                Usar outro CPF
-              </Button>
-              <Button
-                variant="text"
-                size="medium"
-                sx={{ color: 'text.secondary', fontSize: 13 }}
-                onClick={() => { setStatus('idle'); setErrorMsg(null) }}
-              >
-                Tentar novamente
+                Encerrar
               </Button>
             </Box>
           </Box>
