@@ -50,13 +50,15 @@ export default function StepFinal({ formData }: StepFinalProps) {
       // CPF já cadastrado → status especial com opção de voltar ao formulário
       if (err instanceof ApiError && err.status === 409) {
         setStatus('conflict')
-        setErrorMsg(err.message)
+        setErrorMsg(err.displayMessage)
         return
       }
 
       setStatus('error')
       setErrorMsg(
-        err instanceof ApiError ? err.message : 'Ocorreu um erro. Tente novamente.',
+        err instanceof ApiError
+          ? err.displayMessage
+          : 'Ocorreu um erro inesperado. Tente novamente.',
       )
     }
   }
