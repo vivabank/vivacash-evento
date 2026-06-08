@@ -1,5 +1,16 @@
 const BASE_URL = import.meta.env.VITE_API_BASE_URL as string
 
+/** Erro com status HTTP e mensagem vinda do body da API */
+export class ApiError extends Error {
+  constructor(
+    public readonly status: number,
+    message: string,
+  ) {
+    super(message)
+    this.name = 'ApiError'
+  }
+}
+
 export interface ValidateTokenResponse {
   valid: boolean
   isActive: boolean
@@ -24,13 +35,26 @@ export interface RegisterUserResponse {
   prizeAmountReais: number
 }
 
+async function throwApiError(res: Response, fallback: string): Promise<never> {
+  let message = fallback
+  try {
+    const body = await res.json()
+    if (typeof body?.message === 'string' && body.message.trim()) {
+      message = body.message
+    }
+  } catch {
+    // body não é JSON — mantém fallback
+  }
+  throw new ApiError(res.status, message)
+}
+
 export async function validateToken(tokenHash: string): Promise<ValidateTokenResponse> {
   const res = await fetch(`${BASE_URL}/auth/token/validate`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'tenant-id': 'viva' },
     body: JSON.stringify({ tokenHash }),
   })
-  if (!res.ok) throw new Error(`Erro ao validar token (${res.status})`)
+  if (!res.ok) await throwApiError(res, `Erro ao validar token (${res.status})`)
   return res.json()
 }
 
@@ -52,6 +76,6 @@ export async function registerUser(params: {
       },
     }),
   })
-  if (!res.ok) throw new Error(`Erro ao cadastrar usuário (${res.status})`)
+  if (!res.ok) await throwApiError(res, `Erro ao cadastrar usuário (${res.status})`)
   return res.json()
 }

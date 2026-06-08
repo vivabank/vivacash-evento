@@ -5,16 +5,12 @@ import CircularProgress from '@mui/material/CircularProgress'
 import Typography from '@mui/material/Typography'
 import { colors } from '../theme'
 import QRScanner from './QRScanner'
-import { validateToken, registerUser } from '../services/api'
-import type { FormData } from '../types'
+import { validateToken, registerUser, ApiError } from '../services/api'
+import type { StepFinalProps } from '../types'
 
-type Status = 'idle' | 'loading' | 'error'
+type Status = 'idle' | 'loading' | 'error' | 'conflict'
 
-interface StepFinalProps {
-  formData: FormData | null
-}
-
-export default function StepFinal({ formData }: StepFinalProps) {
+export default function StepFinal({ formData, onBackToForm }: StepFinalProps) {
   const [showScanner, setShowScanner] = useState(false)
   const [status, setStatus] = useState<Status>('idle')
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
@@ -50,9 +46,18 @@ export default function StepFinal({ formData }: StepFinalProps) {
       })
 
       window.location.href = `https://meuvivacash.com/code?${registration.code}`
-    } catch {
+    } catch (err) {
+      // CPF já cadastrado → status especial com opção de voltar ao formulário
+      if (err instanceof ApiError && err.status === 409) {
+        setStatus('conflict')
+        setErrorMsg(err.message)
+        return
+      }
+
       setStatus('error')
-      setErrorMsg('Ocorreu um erro. Tente novamente.')
+      setErrorMsg(
+        err instanceof ApiError ? err.message : 'Ocorreu um erro. Tente novamente.',
+      )
     }
   }
 
@@ -135,7 +140,7 @@ export default function StepFinal({ formData }: StepFinalProps) {
           </Box>
         )}
 
-        {/* Error */}
+        {/* Error genérico */}
         {status === 'error' && (
           <Box
             sx={{
@@ -163,6 +168,83 @@ export default function StepFinal({ formData }: StepFinalProps) {
             >
               Tentar novamente
             </Button>
+          </Box>
+        )}
+
+        {/* CPF já cadastrado (409) */}
+        {status === 'conflict' && (
+          <Box
+            sx={{
+              bgcolor: '#FFFFFF',
+              borderRadius: 4,
+              px: { xs: 3, sm: 5 },
+              py: { xs: 4, sm: 5 },
+              width: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: 2.5,
+              boxShadow: '0 18px 40px rgba(0,0,0,0.35)',
+            }}
+          >
+            {/* Ícone de aviso */}
+            <Box
+              sx={{
+                width: 56,
+                height: 56,
+                borderRadius: '50%',
+                bgcolor: 'rgba(237, 108, 2, 0.12)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '1.8rem',
+              }}
+            >
+              ⚠️
+            </Box>
+
+            <Typography
+              sx={{
+                color: '#B45309',
+                fontWeight: 700,
+                fontSize: { xs: 15, sm: 17 },
+                textAlign: 'center',
+                lineHeight: 1.4,
+              }}
+            >
+              CPF já cadastrado neste evento
+            </Typography>
+
+            <Typography
+              sx={{
+                color: 'text.secondary',
+                fontSize: { xs: 13.5, sm: 14.5 },
+                textAlign: 'center',
+                lineHeight: 1.55,
+              }}
+            >
+              {errorMsg}
+            </Typography>
+
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, width: '100%', alignItems: 'center' }}>
+              <Button
+                variant="contained"
+                color="primary"
+                size="large"
+                sx={{ py: 1.1, width: '100%', maxWidth: 280 }}
+                onClick={onBackToForm}
+              >
+                Usar outro CPF
+              </Button>
+              <Button
+                variant="text"
+                size="medium"
+                sx={{ color: 'text.secondary', fontSize: 13 }}
+                onClick={() => { setStatus('idle'); setErrorMsg(null) }}
+              >
+                Tentar novamente
+              </Button>
+            </Box>
           </Box>
         )}
 
