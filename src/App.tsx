@@ -17,11 +17,17 @@ export default function App() {
 
   const next = () => setStep((s) => Math.min(s + 1, 3))
 
+  /** Volta para o StepForm limpando os dados preenchidos */
+  const backToForm = () => {
+    setFormData(null)
+    setStep(1)
+  }
+
   const screens = [
     <StepHero onNext={next} />,
     <StepForm onNext={(data) => { setFormData(data); next() }} />,
     <StepResult onNext={next} />,
-    <StepFinal formData={formData} />,
+    <StepFinal formData={formData} onBackToForm={backToForm} />,
   ]
 
   return (
