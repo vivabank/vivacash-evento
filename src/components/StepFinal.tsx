@@ -10,7 +10,7 @@ import type { StepFinalProps } from '../types'
 
 type Status = 'idle' | 'loading' | 'error' | 'conflict'
 
-export default function StepFinal({ formData, onBackToForm }: StepFinalProps) {
+export default function StepFinal({ formData }: StepFinalProps) {
   const [showScanner, setShowScanner] = useState(false)
   const [status, setStatus] = useState<Status>('idle')
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
