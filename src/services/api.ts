@@ -1,13 +1,21 @@
 const BASE_URL = import.meta.env.VITE_API_BASE_URL as string
 
-/** Erro com status HTTP e mensagem vinda do body da API */
+/** Erro com status HTTP e mensagens vindas do body da API */
 export class ApiError extends Error {
   constructor(
     public readonly status: number,
+    /** Mensagem técnica em inglês (para logs/debug) */
     message: string,
+    /** Mensagem amigável em português (para exibir ao usuário) */
+    public readonly userMessage?: string,
   ) {
     super(message)
     this.name = 'ApiError'
+  }
+
+  /** Retorna userMessage se disponível, senão message */
+  get displayMessage(): string {
+    return this.userMessage ?? this.message
   }
 }
 
@@ -37,15 +45,19 @@ export interface RegisterUserResponse {
 
 async function throwApiError(res: Response, fallback: string): Promise<never> {
   let message = fallback
+  let userMessage: string | undefined
   try {
     const body = await res.json()
     if (typeof body?.message === 'string' && body.message.trim()) {
       message = body.message
     }
+    if (typeof body?.userMessage === 'string' && body.userMessage.trim()) {
+      userMessage = body.userMessage
+    }
   } catch {
     // body não é JSON — mantém fallback
   }
-  throw new ApiError(res.status, message)
+  throw new ApiError(res.status, message, userMessage)
 }
 
 export async function validateToken(tokenHash: string): Promise<ValidateTokenResponse> {
