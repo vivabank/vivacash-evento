@@ -217,17 +217,6 @@ export default function StepFinal({ formData }: StepFinalProps) {
               CPF já cadastrado neste evento
             </Typography>
 
-            <Typography
-              sx={{
-                color: 'text.secondary',
-                fontSize: { xs: 13.5, sm: 14.5 },
-                textAlign: 'center',
-                lineHeight: 1.55,
-              }}
-            >
-              {errorMsg}
-            </Typography>
-
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, width: '100%', alignItems: 'center' }}>
               <Button
                 variant="contained"

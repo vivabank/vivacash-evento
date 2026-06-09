@@ -69,6 +69,15 @@ export default function QRScanner({ onCancel, onCodeDetected }: QRScannerProps) 
         video.srcObject = stream
         await video.play()
 
+        const track = stream.getVideoTracks()[0]
+        if (track) {
+          const capabilities = track.getCapabilities() as MediaTrackCapabilities & { zoom?: { min: number; max: number; step: number } }
+          if (capabilities.zoom) {
+            const targetZoom = Math.min(2, capabilities.zoom.max)
+            await track.applyConstraints({ advanced: [{ zoom: targetZoom } as MediaTrackConstraintSet] })
+          }
+        }
+
         if (!cancelled && scanningRef.current) {
           const ctx = canvas.getContext('2d')
           if (ctx) scanFrame(ctx, video, canvas)
