@@ -13,6 +13,8 @@ function handler(event) {
     targetPrefix = '/evento/main/main-latest';
   } else if (host === 'dev-evento.meuvivacash.com') {
     targetPrefix = '/evento/develop/develop-latest';
+  } else if (host === 'qrcode.meuvivacash.com') {
+    targetPrefix = '/qrcode/main/main-latest';
   } else {
     // Fallback padrão seguro (ex: frontend principal)
     targetPrefix = '/frontend/main/main-latest';
