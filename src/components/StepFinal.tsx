@@ -1,67 +1,115 @@
-import { useState } from 'react'
-import Box from '@mui/material/Box'
-import Button from '@mui/material/Button'
-import CircularProgress from '@mui/material/CircularProgress'
-import Typography from '@mui/material/Typography'
-import { colors } from '../theme'
-import QRScanner from './QRScanner'
-import { validateToken, registerUser, ApiError } from '../services/api'
-import type { StepFinalProps } from '../types'
+import { useState } from 'react';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import CircularProgress from '@mui/material/CircularProgress';
+import Typography from '@mui/material/Typography';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
+import TextField from '@mui/material/TextField';
+import { colors } from '../theme';
+import QRScanner from './QRScanner';
+import { validateToken, validateCode, registerUser, ApiError } from '../services/api';
+import type { StepFinalProps } from '../types';
 
-type Status = 'idle' | 'loading' | 'error' | 'conflict'
+type Status = 'idle' | 'loading' | 'error' | 'conflict';
 
 export default function StepFinal({ formData }: StepFinalProps) {
-  const [showScanner, setShowScanner] = useState(false)
-  const [status, setStatus] = useState<Status>('idle')
-  const [errorMsg, setErrorMsg] = useState<string | null>(null)
+  const [showScanner, setShowScanner] = useState(false);
+  const [showCodeDialog, setShowCodeDialog] = useState(false);
+  const [code, setCode] = useState('');
+  const [status, setStatus] = useState<Status>('idle');
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const handleCodeDetected = async (raw: string) => {
-    setShowScanner(false)
-    setStatus('loading')
-    setErrorMsg(null)
+    setShowScanner(false);
+    setStatus('loading');
+    setErrorMsg(null);
 
-    const tokenHash = raw.includes('?') ? raw.split('?')[1] : raw
+    const tokenHash = raw.includes('?') ? raw.split('?')[1] : raw;
 
     try {
-      const validation = await validateToken(tokenHash)
+      const validation = await validateToken(tokenHash);
 
       if (!validation.valid || !validation.isActive) {
-        setStatus('error')
-        setErrorMsg(validation.message ?? 'Token inválido ou inativo.')
-        return
+        setStatus('error');
+        setErrorMsg(validation.message ?? 'Token inválido ou inativo.');
+        return;
       }
 
       if (!formData) {
-        setStatus('error')
-        setErrorMsg('Dados do formulário não encontrados.')
-        return
+        setStatus('error');
+        setErrorMsg('Dados do formulário não encontrados.');
+        return;
       }
 
-      const cpfDigits = formData.cpf.replace(/\D/g, '')
+      const cpfDigits = formData.cpf.replace(/\D/g, '');
       const registration = await registerUser({
         documentNumber: cpfDigits,
         personName: formData.nome,
         companyName: formData.empresa,
         position: formData.cargo,
-      })
+      });
 
-      window.location.href = `https://meuvivacash.com/code?${registration.code}`
+      window.location.href = `https://meuvivacash.com/code?${registration.code}`;
     } catch (err) {
       // CPF já cadastrado → status especial com opção de voltar ao formulário
       if (err instanceof ApiError && err.status === 409) {
-        setStatus('conflict')
-        setErrorMsg(err.displayMessage)
-        return
+        setStatus('conflict');
+        setErrorMsg(err.displayMessage);
+        return;
       }
 
-      setStatus('error')
-      setErrorMsg(
-        err instanceof ApiError
-          ? err.displayMessage
-          : 'Ocorreu um erro inesperado. Tente novamente.',
-      )
+      setStatus('error');
+      setErrorMsg(err instanceof ApiError ? err.displayMessage : 'Ocorreu um erro inesperado. Tente novamente.');
     }
-  }
+  };
+
+  const handleCodeSubmit = async () => {
+    setShowCodeDialog(false);
+    setStatus('loading');
+    setErrorMsg(null);
+
+    const codeValue = code.trim();
+    setCode('');
+
+    try {
+      const validation = await validateCode(codeValue);
+
+      if (!validation.valid) {
+        setStatus('error');
+        setErrorMsg(validation.message ?? 'Código inválido ou inativo.');
+        return;
+      }
+
+      if (!formData) {
+        setStatus('error');
+        setErrorMsg('Dados do formulário não encontrados.');
+        return;
+      }
+
+      const cpfDigits = formData.cpf.replace(/\D/g, '');
+      const registration = await registerUser({
+        documentNumber: cpfDigits,
+        personName: formData.nome,
+        companyName: formData.empresa,
+        position: formData.cargo,
+      });
+
+      window.location.href = `https://meuvivacash.com/code?${registration.code}`;
+    } catch (err) {
+      // CPF já cadastrado → status especial com opção de voltar ao formulário
+      if (err instanceof ApiError && err.status === 409) {
+        setStatus('conflict');
+        setErrorMsg(err.displayMessage);
+        return;
+      }
+
+      setStatus('error');
+      setErrorMsg(err instanceof ApiError ? err.displayMessage : 'Ocorreu um erro inesperado. Tente novamente.');
+    }
+  };
 
   return (
     <Box
@@ -107,10 +155,7 @@ export default function StepFinal({ formData }: StepFinalProps) {
           sx={{ width: { xs: 182, sm: 58 }, mb: 3 }}
         />
 
-        <Typography
-          component="h1"
-          sx={{ fontWeight: 700, lineHeight: 1.15, fontSize: { xs: 20, sm: 34 }, mb: 4 }}
-        >
+        <Typography component="h1" sx={{ fontWeight: 700, lineHeight: 1.15, fontSize: { xs: 20, sm: 34 }, mb: 4 }}>
           <Box component="span" sx={{ color: '#FFFFFF' }}>
             O colaborador está no{' '}
           </Box>
@@ -136,9 +181,7 @@ export default function StepFinal({ formData }: StepFinalProps) {
             }}
           >
             <CircularProgress size={40} sx={{ color: colors.navy }} />
-            <Typography sx={{ color: colors.navy, fontWeight: 600 }}>
-              Validando e cadastrando…
-            </Typography>
+            <Typography sx={{ color: colors.navy, fontWeight: 600 }}>Validando e cadastrando…</Typography>
           </Box>
         )}
 
@@ -166,7 +209,10 @@ export default function StepFinal({ formData }: StepFinalProps) {
               color="primary"
               size="large"
               sx={{ py: 1.1 }}
-              onClick={() => { setStatus('idle'); setErrorMsg(null) }}
+              onClick={() => {
+                setStatus('idle');
+                setErrorMsg(null);
+              }}
             >
               Tentar novamente
             </Button>
@@ -223,7 +269,7 @@ export default function StepFinal({ formData }: StepFinalProps) {
                 color="primary"
                 size="large"
                 sx={{ py: 1.1, width: '100%', maxWidth: 280 }}
-                onClick={() => window.location.href = 'https://www.vivafintech.com.br/'}
+                onClick={() => (window.location.href = 'https://www.vivafintech.com.br/')}
               >
                 Encerrar
               </Button>
@@ -232,8 +278,8 @@ export default function StepFinal({ formData }: StepFinalProps) {
         )}
 
         {/* Idle — card ou scanner */}
-        {status === 'idle' && (
-          !showScanner ? (
+        {status === 'idle' &&
+          (!showScanner ? (
             <Box
               sx={{
                 bgcolor: '#FFFFFF',
@@ -247,11 +293,9 @@ export default function StepFinal({ formData }: StepFinalProps) {
                 boxShadow: '0 18px 40px rgba(0,0,0,0.35)',
               }}
             >
-              <Typography
-                sx={{ color: colors.navy, fontSize: { xs: 14.5, sm: 16 }, lineHeight: 1.6, mb: 2 }}
-              >
-                A partir de agora, você vivenciará exatamente a mesma jornada que um colaborador real
-                teria ao solicitar sua antecipação.
+              <Typography sx={{ color: colors.navy, fontSize: { xs: 14.5, sm: 16 }, lineHeight: 1.6, mb: 2 }}>
+                A partir de agora, você vivenciará exatamente a mesma jornada que um colaborador real teria ao solicitar
+                sua antecipação.
               </Typography>
               <Typography
                 sx={{
@@ -261,30 +305,71 @@ export default function StepFinal({ formData }: StepFinalProps) {
                   mb: 3.5,
                 }}
               >
-                O próximo passo é o Opt-in da Viva Cash. É fundamental ressaltar que este processo é
-                100% opcional. O colaborador entra efetivamente para o ecossistema Viva Cash se
-                desejar antecipar seus valores; caso contrário, seu fluxo de recebimento padrão via
-                folha de pagamento permanece inalterado.
+                O próximo passo é o Opt-in da Viva Cash. É fundamental ressaltar que este processo é 100% opcional. O
+                colaborador entra efetivamente para o ecossistema Viva Cash se desejar antecipar seus valores; caso
+                contrário, seu fluxo de recebimento padrão via folha de pagamento permanece inalterado.
               </Typography>
 
-              <Button
-                onClick={() => setShowScanner(true)}
-                variant="contained"
-                color="primary"
-                size="large"
-                sx={{ py: 1.1 }}
+              <Box
+                sx={{
+                  display: 'flex',
+                  gap: 2,
+                  flexDirection: { xs: 'column', sm: 'row' },
+                  width: '100%',
+                  justifyContent: 'center',
+                }}
               >
-                Ir para Viva Cash
-              </Button>
+                <Button
+                  onClick={() => setShowScanner(true)}
+                  variant="contained"
+                  color="primary"
+                  size="large"
+                  sx={{ py: 1.1, minWidth: { xs: '100%', sm: 200 } }}
+                >
+                  Entrar via QR Code
+                </Button>
+                <Button
+                  onClick={() => setShowCodeDialog(true)}
+                  variant="outlined"
+                  color="primary"
+                  size="large"
+                  sx={{ py: 1.1, minWidth: { xs: '100%', sm: 200 } }}
+                >
+                  Entrar via Código
+                </Button>
+              </Box>
             </Box>
           ) : (
-            <QRScanner
-              onCancel={() => setShowScanner(false)}
-              onCodeDetected={handleCodeDetected}
-            />
-          )
-        )}
+            <QRScanner onCancel={() => setShowScanner(false)} onCodeDetected={handleCodeDetected} />
+          ))}
       </Box>
+
+      {/* Dialog para entrada de código */}
+      <Dialog open={showCodeDialog} onClose={() => setShowCodeDialog(false)} maxWidth="sm" fullWidth>
+        <DialogTitle sx={{ color: colors.navy, fontWeight: 600 }}>Entrar via Código</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            required
+            margin="dense"
+            label="Código"
+            type="text"
+            fullWidth
+            variant="outlined"
+            value={code}
+            onChange={(e) => setCode(e.target.value)}
+            sx={{ mt: 2 }}
+          />
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2.5 }}>
+          <Button onClick={() => setShowCodeDialog(false)} color="inherit">
+            Cancelar
+          </Button>
+          <Button onClick={handleCodeSubmit} variant="contained" color="primary" disabled={!code.trim()}>
+            Entrar
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
-  )
+  );
 }
