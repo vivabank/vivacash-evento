@@ -66,8 +66,28 @@ jobs:
 
       - name: Deploy to S3
         run: |
-          aws s3 sync dist/ s3://${{ env.AWS_S3_BUCKET }}/evento/develop/${{ env.VERSION_PATH }}/ --delete
-          aws s3 sync dist/ s3://${{ env.AWS_S3_BUCKET }}/evento/develop/develop-latest/ --delete
+          set -euo pipefail
+
+          for DEST in "${{ env.VERSION_PATH }}" "develop-latest"; do
+            BASE="s3://${{ env.AWS_S3_BUCKET }}/evento/develop/$DEST/"
+
+            # Mantém a semântica de antes: remove do destino o que saiu do build.
+            aws s3 sync dist/ "$BASE" --delete --cache-control "no-cache"
+
+            # `sync` pula arquivo idêntico e, ao pular, NÃO grava metadado — os
+            # objetos já no bucket ficariam sem Cache-Control indefinidamente.
+            # `cp` sempre reenvia, então o cabeçalho vale em todo deploy.
+            aws s3 cp dist/ "$BASE" --recursive \
+              --exclude "assets/index-*.js" --exclude "assets/index-*.css" \
+              --cache-control "no-cache"
+
+            # Só o bundle tem hash no nome, então só ele pode ser imutável. O
+            # resto de assets/ vem de public/ com nome estável e conteúdo
+            # mutável; marcá-lo immutable congelaria imagem por um ano.
+            aws s3 cp dist/ "$BASE" --recursive --exclude "*" \
+              --include "assets/index-*.js" --include "assets/index-*.css" \
+              --cache-control "public, max-age=31536000, immutable"
+          done
 
       - name: Update and Publish CloudFront Function
         run: |
