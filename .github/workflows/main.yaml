@@ -10,6 +10,9 @@ jobs:
   build:
     name: Build and Deploy to Main
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
     env:
       AWS_S3_BUCKET: vivacash-frontend
       VERSION_PATH: main-v${{ github.run_number }}
@@ -48,8 +51,7 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          role-to-assume: arn:aws:iam::193516855719:role/github-actions-vivacash-evento
           aws-region: us-east-2
 
       - name: Install dependencies
